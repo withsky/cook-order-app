@@ -40,6 +40,9 @@ class MainActivity : AppCompatActivity() {
             domStorageEnabled = true
             allowFileAccess = true
             allowContentAccess = true
+            allowUniversalAccessFromFileURLs = true
+            allowFileAccessFromFileURLs = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
             cacheMode = WebSettings.LOAD_DEFAULT
             useWideViewPort = true
             loadWithOverviewMode = true
@@ -47,10 +50,23 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = false
             displayZoomControls = false
             defaultTextEncodingName = "UTF-8"
+            // 启用数据库存储（部分设备需要）
+            databaseEnabled = true
         }
 
-        webView.webViewClient = WebViewClient()
-        webView.webChromeClient = WebChromeClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onReceivedError(view: WebView, errorCode: Int, description: String, failingUrl: String) {
+                android.util.Log.e("WebView", "Error: $errorCode - $description - $failingUrl")
+            }
+        }
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(message: android.webkit.ConsoleMessage?): Boolean {
+                message?.let {
+                    android.util.Log.d("WebView", "${it.message()} -- ${it.sourceId()}:${it.lineNumber()}")
+                }
+                return true
+            }
+        }
 
         // 禁用长按选择文字
         webView.setOnLongClickListener { true }
