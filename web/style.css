@@ -1935,3 +1935,147 @@ body.pattern-circles::before {
         font-size: 34px;
     }
 }
+
+/* ===== SVG 图标样式 ===== */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.nav-icon .icon svg {
+    stroke: var(--text-secondary);
+    transition: stroke 0.3s;
+}
+
+.nav-item.active .nav-icon .icon svg {
+    stroke: var(--primary);
+}
+
+/* ===== 背景图片层 ===== */
+.bg-image-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 0.3s;
+}
+
+.bg-image-layer.has-image {
+    opacity: 0.2;
+}
+
+/* ===== 背景图片设置 ===== */
+.bg-image-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow-md);
+}
+
+.bg-image-preview {
+    width: 100%;
+    height: 120px;
+    border-radius: var(--radius-md);
+    background: var(--bg-main);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    border: 2px dashed var(--border);
+}
+
+.bg-image-preview span {
+    color: var(--text-hint);
+    font-size: 13px;
+}
+
+.bg-image-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.bg-image-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--primary-bg);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s;
+}
+
+.bg-image-btn:active {
+    transform: scale(0.97);
+}
+
+.bg-image-btn.danger {
+    background: #FEE2E2;
+    color: var(--danger);
+}
+
+/* ===== 备份按钮 ===== */
+.backup-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.backup-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.backup-btn:active {
+    transform: scale(0.97);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.backup-btn .icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ===== 备份弹窗 ===== */
+.backup-modal {
+    max-height: 70vh;
+}
+
+.backup-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+}

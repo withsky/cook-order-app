@@ -196,9 +196,73 @@ const searchClear = document.getElementById('searchClear');
 function init() {
     loadMenuData();
     loadTheme();
+    loadBackgroundImage();
+    setupIcons();
     renderCategories();
     renderFoodList();
     bindEvents();
+}
+
+// ===== 图标设置 =====
+function setupIcons() {
+    // 导航图标
+    document.getElementById('navIconMenu').innerHTML = getIcon('home', 24);
+    document.getElementById('navIconOrders').innerHTML = getIcon('clipboard', 24);
+    document.getElementById('navIconManage').innerHTML = getIcon('settings', 24);
+    document.getElementById('navIconProfile').innerHTML = getIcon('user', 24);
+    
+    // 头部图标
+    document.getElementById('headerIcon').innerHTML = getIcon('chef', 32);
+    
+    // 搜索图标
+    document.getElementById('searchIcon').innerHTML = getIcon('search', 16);
+    document.getElementById('searchClear').innerHTML = getIcon('x', 14);
+    
+    // 购物车图标
+    document.getElementById('cartFloatIcon').innerHTML = getIcon('cart', 24);
+    
+    // 弹窗关闭按钮
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.innerHTML = getIcon('x', 18);
+    });
+    
+    // 下单成功图标
+    document.getElementById('orderSuccessIcon').innerHTML = getIcon('check', 48);
+    document.getElementById('doneIcon').innerHTML = getIcon('chef', 64);
+}
+
+// ===== 背景图片管理 =====
+let customBackground = '';
+
+function loadBackgroundImage() {
+    const saved = localStorage.getItem('cookBackground');
+    if (saved) {
+        customBackground = saved;
+        applyBackgroundImage();
+    }
+}
+
+function applyBackgroundImage() {
+    const layer = document.getElementById('bgImageLayer');
+    if (customBackground) {
+        layer.style.backgroundImage = `url(${customBackground})`;
+        layer.classList.add('has-image');
+    } else {
+        layer.style.backgroundImage = '';
+        layer.classList.remove('has-image');
+    }
+}
+
+function setBackgroundImage(imageData) {
+    customBackground = imageData;
+    localStorage.setItem('cookBackground', imageData);
+    applyBackgroundImage();
+}
+
+function clearBackgroundImage() {
+    customBackground = '';
+    localStorage.removeItem('cookBackground');
+    applyBackgroundImage();
 }
 
 // ===== 渲染分类 =====
@@ -1021,6 +1085,17 @@ function renderProfilePage() {
                 `).join('')}
             </div>
         </div>
+        <div class="bg-image-section">
+            <div class="theme-selector-title">🖼️ 自定义背景</div>
+            <div class="bg-image-preview" style="background-image: ${customBackground ? `url(${customBackground})` : 'none'}">
+                ${customBackground ? '' : '<span>暂无背景图片</span>'}
+            </div>
+            <div class="bg-image-actions">
+                <input type="file" id="bgImageInput" accept="image/*" style="display:none">
+                <button class="bg-image-btn" id="setBgBtn">${getIcon('image', 18)} 选择图片</button>
+                ${customBackground ? `<button class="bg-image-btn danger" id="clearBgBtn">${getIcon('trash', 18)} 清除</button>` : ''}
+            </div>
+        </div>
         ${topDishes.length > 0 ? `
         <div class="profile-section">
             <div class="profile-section-title">最常点的菜</div>
@@ -1035,6 +1110,14 @@ function renderProfilePage() {
                 `).join('')}
             </div>
         </div>` : ''}
+        <div class="profile-section">
+            <div class="profile-section-title">数据备份与恢复</div>
+            <div class="backup-actions">
+                <input type="file" id="importFileInput" accept=".json" style="display:none">
+                <button class="backup-btn" id="backupBtn">${getIcon('download', 18)} 导出数据</button>
+                <button class="backup-btn" id="importBtn">${getIcon('upload', 18)} 导入数据</button>
+            </div>
+        </div>
         <div class="profile-section">
             <div class="profile-section-title">数据管理</div>
             <button class="profile-danger-btn" id="clearDataBtn">清除所有数据</button>
@@ -1074,6 +1157,119 @@ function renderProfilePage() {
             renderProfilePage();
         });
     });
+
+    // 背景图片设置
+    document.getElementById('setBgBtn')?.addEventListener('click', () => {
+        document.getElementById('bgImageInput').click();
+    });
+
+    document.getElementById('bgImageInput')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setBackgroundImage(event.target.result);
+                renderProfilePage();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('clearBgBtn')?.addEventListener('click', () => {
+        clearBackgroundImage();
+        renderProfilePage();
+    });
+
+    // 备份数据
+    document.getElementById('backupBtn')?.addEventListener('click', backupData);
+
+    // 导入数据
+    document.getElementById('importBtn')?.addEventListener('click', () => {
+        document.getElementById('importFileInput').click();
+    });
+
+    document.getElementById('importFileInput')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            importData(file);
+        }
+    });
+}
+
+// ===== 备份/导入功能 =====
+function backupData() {
+    const data = {
+        version: '1.0',
+        exportTime: new Date().toISOString(),
+        menuData: menuData,
+        orders: JSON.parse(localStorage.getItem('cookOrders') || '[]'),
+        userConfig: getUserConfig(),
+        theme: JSON.parse(localStorage.getItem('cookTheme') || '{}'),
+        background: localStorage.getItem('cookBackground') || ''
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cook-order-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    alert('备份完成！');
+}
+
+function importData(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (!data.version || !data.menuData) {
+                alert('无效的备份文件');
+                return;
+            }
+
+            if (!confirm('导入将覆盖当前所有数据，确定继续吗？')) {
+                return;
+            }
+
+            // 导入菜单数据
+            localStorage.setItem('cookMenuData', JSON.stringify(data.menuData));
+            
+            // 导入订单
+            if (data.orders) {
+                localStorage.setItem('cookOrders', JSON.stringify(data.orders));
+            }
+            
+            // 导入用户配置
+            if (data.userConfig) {
+                localStorage.setItem('cookUserConfig', JSON.stringify(data.userConfig));
+            }
+            
+            // 导入主题
+            if (data.theme) {
+                localStorage.setItem('cookTheme', JSON.stringify(data.theme));
+            }
+            
+            // 导入背景图片
+            if (data.background) {
+                localStorage.setItem('cookBackground', data.background);
+            }
+
+            // 重新加载
+            loadMenuData();
+            loadTheme();
+            loadBackgroundImage();
+            renderProfilePage();
+            
+            alert('导入成功！');
+        } catch (err) {
+            alert('导入失败：文件格式错误');
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
 }
 
 // ===== 启动 =====

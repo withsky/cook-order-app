@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>男友私厨 · 点餐</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👨‍🍳</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF6B35' stroke-width='2'><path d='M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z'/><line x1='6' y1='17' x2='18' y2='17'/></svg>">
 </head>
 <body>
+    <!-- 背景图片层 -->
+    <div class="bg-image-layer" id="bgImageLayer"></div>
+    
     <!-- 顶部导航 -->
     <header class="header">
         <div class="header-left">
-            <span class="header-icon">👨‍🍳</span>
+            <span class="header-icon" id="headerIcon"></span>
             <div>
                 <h1 class="header-title" id="pageTitle">男友私厨</h1>
                 <p class="header-subtitle" id="pageSubtitle">想吃什么，告诉我就好</p>
@@ -21,30 +24,23 @@
 
     <!-- ========== 点餐页面 ========== -->
     <div class="page page-active" id="page-menu">
-        <!-- 搜索栏 -->
         <div class="search-bar">
             <div class="search-inner">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon" id="searchIcon"></span>
                 <input type="text" id="searchInput" placeholder="搜索你想吃的菜..." autocomplete="off">
-                <span class="search-clear" id="searchClear" style="display:none">✕</span>
+                <span class="search-clear" id="searchClear" style="display:none"></span>
             </div>
         </div>
-
-        <!-- 购物车浮动按钮 -->
         <div class="cart-float-btn" id="cartFloatBtn" style="display:none">
-            <span class="cart-float-icon">🛒</span>
+            <span class="cart-float-icon" id="cartFloatIcon"></span>
             <span class="cart-float-badge" id="cartBadge">0</span>
             <div class="cart-float-info">
                 <span class="cart-float-price" id="cartTotalPrice">¥0.00</span>
                 <button class="cart-float-checkout" id="checkoutBtn" disabled>下单</button>
             </div>
         </div>
-
-        <!-- 主体内容 -->
         <div class="main-container">
-            <!-- 左侧分类 -->
             <nav class="category-sidebar" id="categorySidebar"></nav>
-            <!-- 右侧菜品列表 -->
             <div class="food-list" id="foodList"></div>
         </div>
     </div>
@@ -67,30 +63,29 @@
     <!-- ========== 底部导航栏 ========== -->
     <nav class="bottom-nav" id="bottomNav">
         <div class="nav-item active" data-page="menu">
-            <span class="nav-icon">🍳</span>
+            <span class="nav-icon" id="navIconMenu"></span>
             <span class="nav-label">点餐</span>
         </div>
         <div class="nav-item" data-page="orders">
-            <span class="nav-icon">📋</span>
+            <span class="nav-icon" id="navIconOrders"></span>
             <span class="nav-label">订单</span>
         </div>
         <div class="nav-item" data-page="manage">
-            <span class="nav-icon">⚙️</span>
+            <span class="nav-icon" id="navIconManage"></span>
             <span class="nav-label">管理</span>
         </div>
         <div class="nav-item" data-page="profile">
-            <span class="nav-icon">👧</span>
+            <span class="nav-icon" id="navIconProfile"></span>
             <span class="nav-label">我的</span>
         </div>
     </nav>
 
     <!-- ========== 弹窗 ========== -->
-    <!-- 购物车弹窗 -->
     <div class="modal-overlay" id="cartModal" style="display:none">
         <div class="modal-content cart-modal">
             <div class="modal-header">
                 <h2>已选菜品</h2>
-                <button class="modal-close" id="cartModalClose">✕</button>
+                <button class="modal-close" id="cartModalClose"></button>
             </div>
             <div class="cart-modal-body" id="cartModalBody"></div>
             <div class="cart-modal-footer">
@@ -103,10 +98,9 @@
         </div>
     </div>
 
-    <!-- 下单确认弹窗 -->
     <div class="modal-overlay" id="orderModal" style="display:none">
         <div class="modal-content order-modal">
-            <div class="order-success-icon">✅</div>
+            <div class="order-success-icon" id="orderSuccessIcon"></div>
             <h2 class="order-success-title">下单成功！</h2>
             <p class="order-success-subtitle">你的专属厨师正在准备中...</p>
             <div class="order-summary" id="orderSummary"></div>
@@ -121,11 +115,10 @@
         </div>
     </div>
 
-    <!-- 订单完成弹窗 -->
     <div class="modal-overlay" id="doneModal" style="display:none">
         <div class="modal-content done-modal">
             <div class="done-animation">
-                <span class="done-icon">🍳</span>
+                <span class="done-icon" id="doneIcon"></span>
             </div>
             <h2 class="done-title">已通知厨师！</h2>
             <p class="done-subtitle">请耐心等待，美味即将呈现</p>
@@ -134,23 +127,21 @@
         </div>
     </div>
 
-    <!-- 菜品详情弹窗 -->
     <div class="modal-overlay" id="dishDetailModal" style="display:none">
         <div class="modal-content dish-detail-modal">
             <div class="modal-header">
                 <h2 id="dishDetailTitle">菜品详情</h2>
-                <button class="modal-close" id="dishDetailClose">✕</button>
+                <button class="modal-close" id="dishDetailClose"></button>
             </div>
             <div class="dish-detail-body" id="dishDetailBody"></div>
         </div>
     </div>
 
-    <!-- 菜品编辑弹窗 -->
     <div class="modal-overlay" id="dishEditModal" style="display:none">
         <div class="modal-content dish-edit-modal">
             <div class="modal-header">
                 <h2 id="dishEditTitle">添加菜品</h2>
-                <button class="modal-close" id="dishEditClose">✕</button>
+                <button class="modal-close" id="dishEditClose"></button>
             </div>
             <div class="dish-edit-body" id="dishEditBody"></div>
             <div class="dish-edit-footer">
@@ -160,12 +151,11 @@
         </div>
     </div>
 
-    <!-- 昵称设置弹窗 -->
     <div class="modal-overlay" id="nicknameModal" style="display:none">
         <div class="modal-content nickname-modal">
             <div class="modal-header">
                 <h2>设置昵称</h2>
-                <button class="modal-close" id="nicknameModalClose">✕</button>
+                <button class="modal-close" id="nicknameModalClose"></button>
             </div>
             <div class="nickname-body">
                 <p class="nickname-hint">评论时需要显示你的昵称</p>
@@ -175,6 +165,18 @@
         </div>
     </div>
 
+    <!-- 备份/导入弹窗 -->
+    <div class="modal-overlay" id="backupModal" style="display:none">
+        <div class="modal-content backup-modal">
+            <div class="modal-header">
+                <h2 id="backupModalTitle">数据备份</h2>
+                <button class="modal-close" id="backupModalClose"></button>
+            </div>
+            <div class="backup-modal-body" id="backupModalBody"></div>
+        </div>
+    </div>
+
+    <script src="icons.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
