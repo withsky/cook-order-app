@@ -1415,12 +1415,34 @@ function backupData() {
         background: localStorage.getItem('cookBackground') || ''
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const jsonStr = JSON.stringify(data, null, 2);
+    const filename = `cook-order-backup-${new Date().toISOString().slice(0,10)}.json`;
+
+    // 检查是否在 Android 环境中
+    if (typeof FileExport !== 'undefined') {
+        // Android 环境：使用原生接口保存文件
+        try {
+            FileExport.exportFile(filename, jsonStr);
+        } catch (e) {
+            console.error('Android export error:', e);
+            // 回退到浏览器方式
+            downloadBlob(jsonStr, filename);
+        }
+    } else {
+        // 浏览器环境：使用 Blob 下载
+        downloadBlob(jsonStr, filename);
+    }
+}
+
+function downloadBlob(content, filename) {
+    const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cook-order-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download = filename;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
     alert('备份完成！');
 }
