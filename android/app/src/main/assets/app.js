@@ -91,6 +91,62 @@ function saveUserConfig(config) {
     localStorage.setItem('cookUserConfig', JSON.stringify(config));
 }
 
+// ===== 主题管理 =====
+const themes = [
+    { id: 'sunset', name: '暖阳橙', class: 'theme-sunset' },
+    { id: 'sakura', name: '樱花粉', class: 'theme-sakura' },
+    { id: 'mint', name: '薄荷绿', class: 'theme-mint' },
+    { id: 'galaxy', name: '星空紫', class: 'theme-galaxy' },
+    { id: 'ocean', name: '深海蓝', class: 'theme-ocean' },
+    { id: 'matcha', name: '抹茶绿', class: 'theme-matcha' },
+    { id: 'peach', name: '蜜桃橙', class: 'theme-peach' },
+    { id: 'dark', name: '暗夜模式', class: 'theme-dark' }
+];
+
+const patterns = [
+    { id: 'none', name: '无' },
+    { id: 'dots', name: '圆点' },
+    { id: 'waves', name: '波浪' },
+    { id: 'circles', name: '光晕' }
+];
+
+let currentTheme = 'sunset';
+let currentPattern = 'none';
+
+function loadTheme() {
+    const saved = localStorage.getItem('cookTheme');
+    if (saved) {
+        const config = JSON.parse(saved);
+        currentTheme = config.theme || 'sunset';
+        currentPattern = config.pattern || 'none';
+    }
+    applyTheme();
+}
+
+function saveTheme() {
+    localStorage.setItem('cookTheme', JSON.stringify({
+        theme: currentTheme,
+        pattern: currentPattern
+    }));
+}
+
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.body.className = currentPattern !== 'none' ? `pattern-${currentPattern}` : '';
+}
+
+function setTheme(themeId) {
+    currentTheme = themeId;
+    applyTheme();
+    saveTheme();
+}
+
+function setPattern(patternId) {
+    currentPattern = patternId;
+    applyTheme();
+    saveTheme();
+}
+
 // ===== 页面切换 =====
 const pageTitles = {
     menu: { title: '男友私厨', subtitle: '想吃什么，告诉我就好' },
@@ -139,6 +195,7 @@ const searchClear = document.getElementById('searchClear');
 // ===== 初始化 =====
 function init() {
     loadMenuData();
+    loadTheme();
     renderCategories();
     renderFoodList();
     bindEvents();
@@ -944,6 +1001,26 @@ function renderProfilePage() {
                 <div class="stat-label">订单总数</div>
             </div>
         </div>
+        <div class="theme-selector">
+            <div class="theme-selector-title">🎨 选择主题</div>
+            <div class="theme-grid">
+                ${themes.map(t => `
+                    <div class="theme-item ${t.class} ${currentTheme === t.id ? 'active' : ''}" data-theme="${t.id}">
+                        <span class="theme-name">${t.name}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        <div class="pattern-selector">
+            <div class="theme-selector-title">✨ 背景图案</div>
+            <div class="pattern-grid">
+                ${patterns.map(p => `
+                    <div class="pattern-item ${currentPattern === p.id ? 'active' : ''}" data-pattern="${p.id}">
+                        ${p.name}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
         ${topDishes.length > 0 ? `
         <div class="profile-section">
             <div class="profile-section-title">最常点的菜</div>
@@ -974,10 +1051,28 @@ function renderProfilePage() {
             localStorage.removeItem('cookOrders');
             localStorage.removeItem('cookMenuData');
             localStorage.removeItem('cookUserConfig');
+            localStorage.removeItem('cookTheme');
             loadMenuData();
+            loadTheme();
             renderProfilePage();
             alert('数据已清除');
         }
+    });
+
+    // 主题选择
+    container.querySelectorAll('.theme-item').forEach(item => {
+        item.addEventListener('click', () => {
+            setTheme(item.dataset.theme);
+            renderProfilePage();
+        });
+    });
+
+    // 图案选择
+    container.querySelectorAll('.pattern-item').forEach(item => {
+        item.addEventListener('click', () => {
+            setPattern(item.dataset.pattern);
+            renderProfilePage();
+        });
     });
 }
 
